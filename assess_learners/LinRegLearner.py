@@ -40,7 +40,7 @@ class LinRegLearner(object):
         """  		  	   		 	 	 			  		 			     			  	 
         pass  # move along, these aren't the drones you're looking for  		  	   		 	 	 			  		 			     			  	 
   		  	   		 	 	 			  		 			     			  	 
-    def author(self):  		  	   		 	 	 			  		 			     			  	 
+    def author(self):
         """  		  	   		 	 	 			  		 			     			  	 
         :return: The GT username of the student  		  	   		 	 	 			  		 			     			  	 
         :rtype: str  		  	   		 	 	 			  		 			     			  	 
@@ -64,7 +64,7 @@ class LinRegLearner(object):
         # build and save the model  		  	   		 	 	 			  		 			     			  	 
         self.model_coefs, residuals, rank, s = np.linalg.lstsq(  		  	   		 	 	 			  		 			     			  	 
             new_data_x, data_y, rcond=None  		  	   		 	 	 			  		 			     			  	 
-        )  		  	   		 	 	 			  		 			     			  	 
+        )
   		  	   		 	 	 			  		 			     			  	 
     def query(self, points):  		  	   		 	 	 			  		 			     			  	 
         """  		  	   		 	 	 			  		 			     			  	 
