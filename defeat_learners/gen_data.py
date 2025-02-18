@@ -21,9 +21,9 @@ GT honor code violation.
   		  	   		 	 	 			  		 			     			  	 
 -----do not edit anything above this line---  		  	   		 	 	 			  		 			     			  	 
   		  	   		 	 	 			  		 			     			  	 
-Student Name: Tucker Balch (replace with your name)  		  	   		 	 	 			  		 			     			  	 
-GT User ID: tb34 (replace with your User ID)  		  	   		 	 	 			  		 			     			  	 
-GT ID: 900897987 (replace with your GT ID)  		  	   		 	 	 			  		 			     			  	 
+Student Name: Longtai Liao	  	   		 	 	 			  		 			     			  	 
+GT User ID: lliao32		  	   		 	 	 			  		 			     			  	 
+GT ID: 903648350		  	   		 	 	 			  		 			     			  	 
 """  		  	   		 	 	 			  		 			     			  	 
   		  	   		 	 	 			  		 			     			  	 
 import math  		  	   		 	 	 			  		 			     			  	 
@@ -45,11 +45,8 @@ def best_4_lin_reg(seed=1489683273):
     :rtype: numpy.ndarray  		  	   		 	 	 			  		 			     			  	 
     """  		  	   		 	 	 			  		 			     			  	 
     np.random.seed(seed)  		  	   		 	 	 			  		 			     			  	 
-    x = np.zeros((100, 2))  		  	   		 	 	 			  		 			     			  	 
-    y = np.random.random(size=(100,)) * 200 - 100  		  	   		 	 	 			  		 			     			  	 
-    # Here's is an example of creating a Y from randomly generated  		  	   		 	 	 			  		 			     			  	 
-    # X with multiple columns  		  	   		 	 	 			  		 			     			  	 
-    # y = x[:,0] + np.sin(x[:,1]) + x[:,2]**2 + x[:,3]**3  		  	   		 	 	 			  		 			     			  	 
+    x = np.random.random(size=(500,7))
+    y = x[:,0] + np.sin(x[:,1]) + x[:,2]**3 + x[:,3]**2 + np.sqrt(x[:,4]) + np.log(x[:,5]) + x[:,6]*7
     return x, y  		  	   		 	 	 			  		 			     			  	 
   		  	   		 	 	 			  		 			     			  	 
   		  	   		 	 	 			  		 			     			  	 
@@ -64,18 +61,22 @@ def best_4_dt(seed=1489683273):
     :return: Returns data that performs significantly better with DTLearner than LinRegLearner.  		  	   		 	 	 			  		 			     			  	 
     :rtype: numpy.ndarray  		  	   		 	 	 			  		 			     			  	 
     """  		  	   		 	 	 			  		 			     			  	 
-    np.random.seed(seed)  		  	   		 	 	 			  		 			     			  	 
-    x = np.zeros((100, 2))  		  	   		 	 	 			  		 			     			  	 
-    y = np.random.random(size=(100,)) * 200 - 100  		  	   		 	 	 			  		 			     			  	 
-    return x, y  		  	   		 	 	 			  		 			     			  	 
-  		  	   		 	 	 			  		 			     			  	 
+    np.random.seed(seed)
+    x = np.random.random((500, 3))
+    y = np.ones(500) # Default to 1
+    y[(x[:, 0] > 0.5) & (x[:, 1] < 0.5) & (x[:, 2] > 0.5)] = 3
+    y[(x[:, 0] < 0.5) & (x[:, 1] > 0.5) & (x[:, 2] < 0.5)] = 2
+    return x, y
   		  	   		 	 	 			  		 			     			  	 
 def author():  		  	   		 	 	 			  		 			     			  	 
     """  		  	   		 	 	 			  		 			     			  	 
     :return: The GT username of the student  		  	   		 	 	 			  		 			     			  	 
     :rtype: str  		  	   		 	 	 			  		 			     			  	 
     """  		  	   		 	 	 			  		 			     			  	 
-    return "tb34"  # Change this to your user ID  		  	   		 	 	 			  		 			     			  	 
+    return "lliao32"
+
+def study_group():
+    return "lliao32"
   		  	   		 	 	 			  		 			     			  	 
   		  	   		 	 	 			  		 			     			  	 
 if __name__ == "__main__":  		  	   		 	 	 			  		 			     			  	 

@@ -48,18 +48,16 @@ class DTLearner(object):
         """  		  	   		 	 	 			  		 			     			  	 
         Constructor method  		  	   		 	 	 			  		 			     			  	 
         """  		  	   		 	 	 			  		 			     			  	 
-        warnings.warn(  		  	   		 	 	 			  		 			     			  	 
-            "\n\n  WARNING! THIS IS NOT A CORRECT DTLearner IMPLEMENTATION!"  		  	   		 	 	 			  		 			     			  	 
-            " REPLACE WITH YOUR OWN CODE\n"  		  	   		 	 	 			  		 			     			  	 
-        )  		  	   		 	 	 			  		 			     			  	 
-        pass  # move along, these aren't the drones you're looking for  		  	   		 	 	 			  		 			     			  	 
+        self.leaf_size = leaf_size
+        self.tree = None
+        self.verbose = verbose
   		  	   		 	 	 			  		 			     			  	 
     def author(self):  		  	   		 	 	 			  		 			     			  	 
         """  		  	   		 	 	 			  		 			     			  	 
         :return: The GT username of the student  		  	   		 	 	 			  		 			     			  	 
         :rtype: str  		  	   		 	 	 			  		 			     			  	 
         """  		  	   		 	 	 			  		 			     			  	 
-        return "tb34"  # replace tb34 with your Georgia Tech username  		  	   		 	 	 			  		 			     			  	 
+        return "lliao32"
   		  	   		 	 	 			  		 			     			  	 
     def add_evidence(self, data_x, data_y):  		  	   		 	 	 			  		 			     			  	 
         """  		  	   		 	 	 			  		 			     			  	 
@@ -71,28 +69,74 @@ class DTLearner(object):
         :type data_y: numpy.ndarray  		  	   		 	 	 			  		 			     			  	 
         """  		  	   		 	 	 			  		 			     			  	 
   		  	   		 	 	 			  		 			     			  	 
-        # slap on 1s column so linear regression finds a constant term  		  	   		 	 	 			  		 			     			  	 
-        new_data_x = np.ones([data_x.shape[0], data_x.shape[1] + 1])  		  	   		 	 	 			  		 			     			  	 
-        new_data_x[:, 0 : data_x.shape[1]] = data_x  		  	   		 	 	 			  		 			     			  	 
+        data = np.concatenate((data_x, data_y[:, None]), axis=1)
+        self.tree = self.build_tree(data)
+        if self.verbose: print(self.tree)
   		  	   		 	 	 			  		 			     			  	 
-        # build and save the model  		  	   		 	 	 			  		 			     			  	 
-        self.model_coefs, residuals, rank, s = np.linalg.lstsq(  		  	   		 	 	 			  		 			     			  	 
-            new_data_x, data_y, rcond=None  		  	   		 	 	 			  		 			     			  	 
-        )  		  	   		 	 	 			  		 			     			  	 
+    def query(self, points):
+        """
+        Estimate a set of test points given the model we built.
+
+        :param points: A numpy array with each row corresponding to a specific query.
+        :type points: numpy.ndarray
+        :return: The predicted result of the input data according to the trained model
+        :rtype: numpy.ndarray
+        """
+        predictions = np.zeros(points.shape[0])
+        for i, p in enumerate(points):
+            node_idx = 0
+
+            while self.tree[node_idx][0] != "Leaf":
+                node = self.tree[node_idx]
+                feature = int(float(node[0]))
+                split_val = float(node[1])
+
+                if p[feature] <= split_val:
+                    node_idx += int(float(node[2]))  # Left path
+                else:
+                    node_idx += int(float(node[3]))  # Right path
+
+            predictions[i] = float(self.tree[node_idx][1])
+        return predictions
   		  	   		 	 	 			  		 			     			  	 
-    def query(self, points):  		  	   		 	 	 			  		 			     			  	 
-        """  		  	   		 	 	 			  		 			     			  	 
-        Estimate a set of test points given the model we built.  		  	   		 	 	 			  		 			     			  	 
-  		  	   		 	 	 			  		 			     			  	 
-        :param points: A numpy array with each row corresponding to a specific query.  		  	   		 	 	 			  		 			     			  	 
-        :type points: numpy.ndarray  		  	   		 	 	 			  		 			     			  	 
-        :return: The predicted result of the input data according to the trained model  		  	   		 	 	 			  		 			     			  	 
-        :rtype: numpy.ndarray  		  	   		 	 	 			  		 			     			  	 
-        """  		  	   		 	 	 			  		 			     			  	 
-        return (self.model_coefs[:-1] * points).sum(axis=1) + self.model_coefs[  		  	   		 	 	 			  		 			     			  	 
-            -1  		  	   		 	 	 			  		 			     			  	 
-        ]  		  	   		 	 	 			  		 			     			  	 
-  		  	   		 	 	 			  		 			     			  	 
-  		  	   		 	 	 			  		 			     			  	 
-if __name__ == "__main__":  		  	   		 	 	 			  		 			     			  	 
+    def build_tree(self, data):
+
+        #  base case
+        # Tree structure: [feature, split_val, left_child, right_child]
+        if data.shape[0] <= self.leaf_size:
+            return np.array([["Leaf", np.mean(data[:, -1]), np.nan, np.nan]])
+        if np.unique(data[:, -1]).shape[0] == 1:
+            return np.array([["Leaf", np.unique(data[:,-1])[0], np.nan, np.nan]])
+
+        best_i, best_val = self.best_split(data)
+        if best_i == -1:
+            return np.array([["Leaf", np.mean(data[:, -1]), np.nan, np.nan]])
+        #split data into left and right
+        left_mask = data[:, best_i] <= best_val
+        right_mask = ~left_mask
+
+        # make a leaf, if split doesn't separate data,
+        if np.all(left_mask) or np.all(~left_mask):
+            return np.array([["Leaf", np.mean(data[:, -1]), np.nan, np.nan]])
+
+        left_tree = self.build_tree(data[left_mask])
+        right_tree = self.build_tree(data[right_mask])
+        root = np.array([[best_i, best_val, 1, left_tree.shape[0] + 1]])
+        return np.concatenate((root, left_tree, right_tree))
+
+    def best_split(self, data):
+        best_i = -1
+        best_val = 0
+        max_corr = -1
+        # data_x = data[:, :-1]
+        for i in range(data.shape[1] - 1):
+            # if len(np.unique(data[:, i])) > 1:
+            corr = np.corrcoef(data[:, i], data[:, -1])[0, 1]
+            if not np.isnan(corr) and abs(corr) > max_corr:
+                max_corr = abs(corr)
+                best_i = i
+                best_val = np.median(data[:, i])
+        return best_i, best_val
+
+if __name__ == "__main__":
     print("the secret clue is 'zzyzx'")  		  	   		 	 	 			  		 			     			  	 
