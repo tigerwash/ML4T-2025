@@ -20,10 +20,9 @@ students of CS 7646 is prohibited and subject to being investigated as a
 GT honor code violation.  		  	   		 	 	 			  		 			     			  	 
   		  	   		 	 	 			  		 			     			  	 
 -----do not edit anything above this line---  		  	   		 	 	 			  		 			     			  	 
-  		  	   		 	 	 			  		 			     			  	 
-Student Name: Tucker Balch (replace with your name)  		  	   		 	 	 			  		 			     			  	 
-GT User ID: tb34 (replace with your User ID)  		  	   		 	 	 			  		 			     			  	 
-GT ID: 900897987 (replace with your GT ID)  		  	   		 	 	 			  		 			     			  	 
+Student Name: Longtai Liao
+GT User ID: lliao32
+GT ID:  903648350		  	   		 	 	 			  		 			     			  	 
 """  		  	   		 	 	 			  		 			     			  	 
   		  	   		 	 	 			  		 			     			  	 
 import datetime as dt  		  	   		 	 	 			  		 			     			  	 
@@ -33,9 +32,16 @@ import numpy as np
   		  	   		 	 	 			  		 			     			  	 
 import pandas as pd  		  	   		 	 	 			  		 			     			  	 
 from util import get_data, plot_data  		  	   		 	 	 			  		 			     			  	 
-  		  	   		 	 	 			  		 			     			  	 
-  		  	   		 	 	 			  		 			     			  	 
-def compute_portvals(  		  	   		 	 	 			  		 			     			  	 
+import matplotlib.pyplot as plt
+
+def author():
+    return "lliao32"
+
+def study_group():
+    return "lliao32"
+
+
+def compute_portvals(
     orders_file="./orders/orders.csv",  		  	   		 	 	 			  		 			     			  	 
     start_val=1000000,  		  	   		 	 	 			  		 			     			  	 
     commission=9.95,  		  	   		 	 	 			  		 			     			  	 
@@ -58,20 +64,52 @@ def compute_portvals(
     # this is the function the autograder will call to test your code  		  	   		 	 	 			  		 			     			  	 
     # NOTE: orders_file may be a string, or it may be a file object. Your  		  	   		 	 	 			  		 			     			  	 
     # code should work correctly with either input  		  	   		 	 	 			  		 			     			  	 
-    # TODO: Your code here  		  	   		 	 	 			  		 			     			  	 
-  		  	   		 	 	 			  		 			     			  	 
-    # In the template, instead of computing the value of the portfolio, we just  		  	   		 	 	 			  		 			     			  	 
-    # read in the value of IBM over 6 months  		  	   		 	 	 			  		 			     			  	 
-    start_date = dt.datetime(2008, 1, 1)  		  	   		 	 	 			  		 			     			  	 
-    end_date = dt.datetime(2008, 6, 1)  		  	   		 	 	 			  		 			     			  	 
-    portvals = get_data(["IBM"], pd.date_range(start_date, end_date))  		  	   		 	 	 			  		 			     			  	 
-    portvals = portvals[["IBM"]]  # remove SPY  		  	   		 	 	 			  		 			     			  	 
-    rv = pd.DataFrame(index=portvals.index, data=portvals.values)  		  	   		 	 	 			  		 			     			  	 
-  		  	   		 	 	 			  		 			     			  	 
-    return rv  		  	   		 	 	 			  		 			     			  	 
-    return portvals  		  	   		 	 	 			  		 			     			  	 
-  		  	   		 	 	 			  		 			     			  	 
-  		  	   		 	 	 			  		 			     			  	 
+    # TODO: Your code here
+
+
+    order = pd.read_csv(orders_file, index_col='Date', dtype='|str, str, str,  i4',  parse_dates=True, na_values=['nan']) # todo: may need to check if isinstance()
+    order.sort_index()
+
+    start_date = order.index[0]
+    end_date = order.index[-1]
+    symbols = order['Symbol'].unique()
+
+    prices_record = get_data(symbols, pd.date_range(start_date, end_date)) #stock prices_record of the selected symbols
+    prices_record['value'] = pd.Series(0.0, index=prices_record.index) # placeholder for the value of the portfolio
+
+    portfolio = {} # store tfhe number of shares of each stock in the portfolio, and cash
+    for s in symbols:
+        portfolio[s] = 0
+    portfolio['cash'] = start_val
+
+    for date, price in prices_record.iterrows():
+        for index, od in order.iterrows():
+            if index == date:
+                if od['Order'] == 'BUY':
+                    portfolio[od['Symbol']] += od['Shares']
+                    portfolio['cash'] -= od['Shares'] * price[od['Symbol']] * (1 + impact) + commission
+                elif od['Order'] == 'SELL':
+                    portfolio[od['Symbol']] -= od['Shares']
+                    portfolio['cash'] += od['Shares'] * price[od['Symbol']] * (1 - impact) - commission
+
+        # Calculate total stock value
+        stock_value = 0
+        for symbol in symbols:
+            shares = portfolio[symbol]
+            stock_price = price[symbol]
+            stock_value += shares * stock_price
+
+        # Add cash and update the value
+        total_value = stock_value + portfolio['cash']
+        prices_record.loc[date, 'value'] = total_value
+
+    # print(prices_record['value'])
+    return prices_record['value']
+
+def get_daily_returns(df):
+    daily_return = df.pct_change()
+    return daily_return.iloc[1:]
+
 def test_code():  		  	   		 	 	 			  		 			     			  	 
     """  		  	   		 	 	 			  		 			     			  	 
     Helper function to test code  		  	   		 	 	 			  		 			     			  	 
@@ -80,7 +118,7 @@ def test_code():
     # note that during autograding his function will not be called.  		  	   		 	 	 			  		 			     			  	 
     # Define input parameters  		  	   		 	 	 			  		 			     			  	 
   		  	   		 	 	 			  		 			     			  	 
-    of = "./orders/orders2.csv"  		  	   		 	 	 			  		 			     			  	 
+    of = "./orders/orders-12.csv"
     sv = 1000000  		  	   		 	 	 			  		 			     			  	 
   		  	   		 	 	 			  		 			     			  	 
     # Process orders  		  	   		 	 	 			  		 			     			  	 
@@ -90,22 +128,40 @@ def test_code():
     else:  		  	   		 	 	 			  		 			     			  	 
         "warning, code did not return a DataFrame"  		  	   		 	 	 			  		 			     			  	 
   		  	   		 	 	 			  		 			     			  	 
-    # Get portfolio stats  		  	   		 	 	 			  		 			     			  	 
-    # Here we just fake the data. you should use your code from previous assignments.  		  	   		 	 	 			  		 			     			  	 
-    start_date = dt.datetime(2008, 1, 1)  		  	   		 	 	 			  		 			     			  	 
-    end_date = dt.datetime(2008, 6, 1)  		  	   		 	 	 			  		 			     			  	 
-    cum_ret, avg_daily_ret, std_daily_ret, sharpe_ratio = [  		  	   		 	 	 			  		 			     			  	 
-        0.2,  		  	   		 	 	 			  		 			     			  	 
-        0.01,  		  	   		 	 	 			  		 			     			  	 
-        0.02,  		  	   		 	 	 			  		 			     			  	 
-        1.5,  		  	   		 	 	 			  		 			     			  	 
-    ]  		  	   		 	 	 			  		 			     			  	 
-    cum_ret_SPY, avg_daily_ret_SPY, std_daily_ret_SPY, sharpe_ratio_SPY = [  		  	   		 	 	 			  		 			     			  	 
-        0.2,  		  	   		 	 	 			  		 			     			  	 
-        0.01,  		  	   		 	 	 			  		 			     			  	 
-        0.02,  		  	   		 	 	 			  		 			     			  	 
-        1.5,  		  	   		 	 	 			  		 			     			  	 
-    ]  		  	   		 	 	 			  		 			     			  	 
+    # Get portfolio stats
+    order = pd.read_csv(of, index_col='Date', dtype='|str, str, str,  i4',  parse_dates=True, na_values=['nan']) # todo: may need to check if isinstance()
+    order.sort_index()
+
+    start_date = order.index[0]
+    end_date = order.index[-1]
+
+    cum_ret = portvals[-1] / portvals[0] - 1  # cumulative_return
+    daily_return = get_daily_returns(portvals)
+    avg_daily_ret = daily_return.mean()  # avg daily return
+    std_daily_ret = daily_return.std()  # standard daily return
+    sharpe_ratio = (avg_daily_ret / std_daily_ret) * np.sqrt(252)  # sharp ratio
+
+
+    prices_SPY = get_data(['SPY'], pd.date_range(start_date, end_date))
+    normalized_SPY = prices_SPY / prices_SPY.iloc[0] * 1000000
+
+    cum_ret_SPY = normalized_SPY.iloc[-1] / normalized_SPY.iloc[0] - 1  # Use iloc for both first and last values
+    daily_return_SPY = get_daily_returns(normalized_SPY)
+    avg_daily_ret_SPY = daily_return_SPY.mean()  # avg daily return
+    std_daily_ret_SPY = daily_return_SPY.std()  # standard daily return
+    sharpe_ratio_SPY = (avg_daily_ret_SPY / std_daily_ret_SPY) * np.sqrt(252)  # sharp ratio
+
+
+    # df_temp = pd.concat(
+    #     [portvals, normalized_SPY], keys=["Portfolio", "SPY"], axis=1
+    # )
+    # df_temp.plot(title="Daily Portfolio Value and SPY")
+    # plt.xlabel("Date")
+    # plt.ylabel("Normalized Price")
+    # plt.legend()
+    # plt.grid()
+    # plt.show()
+    # plt.savefig('Figure1.png')
   		  	   		 	 	 			  		 			     			  	 
     # Compare portfolio against $SPX  		  	   		 	 	 			  		 			     			  	 
     print(f"Date Range: {start_date} to {end_date}")  		  	   		 	 	 			  		 			     			  	 
