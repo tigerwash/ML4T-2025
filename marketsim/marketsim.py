@@ -118,7 +118,9 @@ def test_code():
     # note that during autograding his function will not be called.  		  	   		 	 	 			  		 			     			  	 
     # Define input parameters  		  	   		 	 	 			  		 			     			  	 
   		  	   		 	 	 			  		 			     			  	 
-    of = "./orders/orders-12.csv"
+    of = "./orders/orders-short.csv"
+    # of = "./orders/orders-11.csv"
+
     sv = 1000000  		  	   		 	 	 			  		 			     			  	 
   		  	   		 	 	 			  		 			     			  	 
     # Process orders  		  	   		 	 	 			  		 			     			  	 
@@ -142,7 +144,7 @@ def test_code():
     sharpe_ratio = (avg_daily_ret / std_daily_ret) * np.sqrt(252)  # sharp ratio
 
 
-    prices_SPY = get_data(['SPY'], pd.date_range(start_date, end_date))
+    prices_SPY = get_data(['$SPX'], pd.date_range(start_date, end_date))
     normalized_SPY = prices_SPY / prices_SPY.iloc[0] * 1000000
 
     cum_ret_SPY = normalized_SPY.iloc[-1] / normalized_SPY.iloc[0] - 1  # Use iloc for both first and last values
