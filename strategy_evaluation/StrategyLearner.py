@@ -1,4 +1,8 @@
-""""""  		  	   		 	 	 			  		 			     			  	 
+""""""
+from assess_learners.RTLearner import RTLearner
+import datetime as dt
+import indicators as ind
+
 """  		  	   		 	 	 			  		 			     			  	 
 Template for implementing StrategyLearner  (c) 2016 Tucker Balch  		  	   		 	 	 			  		 			     			  	 
   		  	   		 	 	 			  		 			     			  	 
@@ -22,9 +26,9 @@ GT honor code violation.
   		  	   		 	 	 			  		 			     			  	 
 -----do not edit anything above this line---  		  	   		 	 	 			  		 			     			  	 
   		  	   		 	 	 			  		 			     			  	 
-Student Name: Tucker Balch (replace with your name)  		  	   		 	 	 			  		 			     			  	 
-GT User ID: tb34 (replace with your User ID)  		  	   		 	 	 			  		 			     			  	 
-GT ID: 900897987 (replace with your GT ID)  		  	   		 	 	 			  		 			     			  	 
+Student Name: longtai liao		  	   		 	 	 			  		 			     			  	 
+GT User ID: lliao32  	   		 	 	 			  		 			     			  	 
+GT ID: 903648350 	  	   		 	 	 			  		 			     			  	 
 """  		  	   		 	 	 			  		 			     			  	 
   		  	   		 	 	 			  		 			     			  	 
 import datetime as dt  		  	   		 	 	 			  		 			     			  	 
@@ -53,9 +57,17 @@ class StrategyLearner(object):
         """  		  	   		 	 	 			  		 			     			  	 
         self.verbose = verbose  		  	   		 	 	 			  		 			     			  	 
         self.impact = impact  		  	   		 	 	 			  		 			     			  	 
-        self.commission = commission  		  	   		 	 	 			  		 			     			  	 
+        self.commission = commission
+        self.learner = RTLearner()
   		  	   		 	 	 			  		 			     			  	 
-    # this method should create a QLearner, and train it for trading  		  	   		 	 	 			  		 			     			  	 
+    # this method should create a QLearner, and train it for trading
+
+    def author(self):
+        return 'lliao32'
+
+    def study_group(self):
+        return "lliao32"
+
     def add_evidence(  		  	   		 	 	 			  		 			     			  	 
         self,  		  	   		 	 	 			  		 			     			  	 
         symbol="IBM",  		  	   		 	 	 			  		 			     			  	 
@@ -81,25 +93,17 @@ class StrategyLearner(object):
         # example usage of the old backward compatible util function  		  	   		 	 	 			  		 			     			  	 
         syms = [symbol]  		  	   		 	 	 			  		 			     			  	 
         dates = pd.date_range(sd, ed)  		  	   		 	 	 			  		 			     			  	 
-        prices_all = ut.get_data(syms, dates)  # automatically adds SPY  		  	   		 	 	 			  		 			     			  	 
+        prices_all = ut.get_data(syms, dates, False)  # automatically adds SPY
         prices = prices_all[syms]  # only portfolio symbols  		  	   		 	 	 			  		 			     			  	 
-        prices_SPY = prices_all["SPY"]  # only SPY, for comparison later  		  	   		 	 	 			  		 			     			  	 
-        if self.verbose:  		  	   		 	 	 			  		 			     			  	 
-            print(prices)  		  	   		 	 	 			  		 			     			  	 
-  		  	   		 	 	 			  		 			     			  	 
-        # example use with new colname  		  	   		 	 	 			  		 			     			  	 
-        volume_all = ut.get_data(  		  	   		 	 	 			  		 			     			  	 
-            syms, dates, colname="Volume"  		  	   		 	 	 			  		 			     			  	 
-        )  # automatically adds SPY  		  	   		 	 	 			  		 			     			  	 
-        volume = volume_all[syms]  # only portfolio symbols  		  	   		 	 	 			  		 			     			  	 
-        volume_SPY = volume_all["SPY"]  # only SPY, for comparison later  		  	   		 	 	 			  		 			     			  	 
-        if self.verbose:  		  	   		 	 	 			  		 			     			  	 
-            print(volume)  		  	   		 	 	 			  		 			     			  	 
-  		  	   		 	 	 			  		 			     			  	 
+
+        train_x = self.indicators(prices, symbol)
+
+
+
     # this method should use the existing policy and test it against new data  		  	   		 	 	 			  		 			     			  	 
     def testPolicy(  		  	   		 	 	 			  		 			     			  	 
         self,  		  	   		 	 	 			  		 			     			  	 
-        symbol="IBM",  		  	   		 	 	 			  		 			     			  	 
+        symbol="JPM",
         sd=dt.datetime(2009, 1, 1),  		  	   		 	 	 			  		 			     			  	 
         ed=dt.datetime(2010, 1, 1),  		  	   		 	 	 			  		 			     			  	 
         sv=10000,  		  	   		 	 	 			  		 			     			  	 
@@ -127,22 +131,24 @@ class StrategyLearner(object):
         dates = pd.date_range(sd, ed)  		  	   		 	 	 			  		 			     			  	 
         prices_all = ut.get_data([symbol], dates)  # automatically adds SPY  		  	   		 	 	 			  		 			     			  	 
         trades = prices_all[[symbol,]]  # only portfolio symbols  		  	   		 	 	 			  		 			     			  	 
-        trades_SPY = prices_all["SPY"]  # only SPY, for comparison later  		  	   		 	 	 			  		 			     			  	 
-        trades.values[:, :] = 0  # set them all to nothing  		  	   		 	 	 			  		 			     			  	 
-        trades.values[0, :] = 1000  # add a BUY at the start  		  	   		 	 	 			  		 			     			  	 
-        trades.values[40, :] = -1000  # add a SELL  		  	   		 	 	 			  		 			     			  	 
-        trades.values[41, :] = 1000  # add a BUY  		  	   		 	 	 			  		 			     			  	 
-        trades.values[60, :] = -2000  # go short from long  		  	   		 	 	 			  		 			     			  	 
-        trades.values[61, :] = 2000  # go long from short  		  	   		 	 	 			  		 			     			  	 
-        trades.values[-1, :] = -1000  # exit on the last day  		  	   		 	 	 			  		 			     			  	 
-        if self.verbose:  		  	   		 	 	 			  		 			     			  	 
-            print(type(trades))  # it better be a DataFrame!  		  	   		 	 	 			  		 			     			  	 
-        if self.verbose:  		  	   		 	 	 			  		 			     			  	 
-            print(trades)  		  	   		 	 	 			  		 			     			  	 
-        if self.verbose:  		  	   		 	 	 			  		 			     			  	 
-            print(prices_all)  		  	   		 	 	 			  		 			     			  	 
-        return trades  		  	   		 	 	 			  		 			     			  	 
+
+
+        return trades
+
+    # get the indicators for the given stock prices, used for training the learner
+    def indicators(self, prices, symbol):
+        macd = ind.macd(prices[symbol])
+        rsi = ind.rsi(prices[symbol])
+        bbp = ind.bbp(prices[symbol])
+        sma = ind.sma(prices[symbol])
+        indicator_matrix = pd.concat([macd, rsi, bbp, sma], axis=1)
+        print("==================== indicator_matrix")
+        print(indicator_matrix)
+        return indicator_matrix
+
   		  	   		 	 	 			  		 			     			  	 
   		  	   		 	 	 			  		 			     			  	 
-if __name__ == "__main__":  		  	   		 	 	 			  		 			     			  	 
+if __name__ == "__main__":
+
+    out = testPolicy()
     print("One does not simply think up a strategy")  		  	   		 	 	 			  		 			     			  	 
