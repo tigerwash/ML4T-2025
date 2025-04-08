@@ -50,9 +50,9 @@ class ManualStrategy:
     def manual_strategy(self, macd, rsi, bbp):
 
 
-        trades = macd.copy()
-        trades.loc[:] = 0
-
+        # trades = macd.copy()
+        # trades.loc[:] = 0
+        trades = pd.DataFrame(0, index=macd.index, columns=[self.symbol])
 
         # Create a new column for the symbol in orders dataframe
 
@@ -82,22 +82,22 @@ class ManualStrategy:
             # Apply trading logic based on current position
             if position == -1000:  # Currently short
                 if buy_signal:
-                    trades.loc[date] = 2000
+                    trades.loc[date, self.symbol] = 2000
                     position = 1000
             elif position == 0:  # No position
                 if buy_signal:
-                    trades.loc[date] = 1000 # Go long
+                    trades.loc[date, self.symbol] = 1000 # Go long
 
                     position = 1000
                 elif sell_signal:
                     # orders.at[date, 'Shares'] = -1000
-                    trades.loc[date] = -1000 # Go short
+                    trades.loc[date, self.symbol] = -1000 # Go short
 
                     position = -1000
             elif position == 1000:  # Currently long
                 if sell_signal:
                     # orders.at[date, 'Shares'] = -2000
-                    trades.loc[date] = -2000 # Sell and go short
+                    trades.loc[date, self.symbol] = -2000 # Sell and go short
 
                     position = -1000
 

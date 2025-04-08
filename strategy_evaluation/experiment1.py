@@ -4,6 +4,7 @@ import datetime as dt
 import BenchmarkStrategy
 import pandas as pd
 import matplotlib.pyplot as plt
+import StrategyLearner
 def author():
     return "lliao32"
 
@@ -12,16 +13,37 @@ def study_group():
 
 
 # create orders from trades
+    """
+    Process the trades dataframe and convert it to orders format
+
+    :param trades: DataFrame with a single column containing trade signals (+1000, -1000, etc.)
+    :param selected_symbol: The stock symbol being traded
+    :return: DataFrame with columns ['Symbol', 'Order', 'Shares']
+    """
 def process_orders(trades, selected_symbol):
     orders = pd.DataFrame(index=trades.index, columns=['Symbol', 'Order', 'Shares'])
     orders['Symbol'] = selected_symbol
-    for i in range(len(trades)):
-        if trades.iloc[i] > 0:
-            orders.iloc[i] = [selected_symbol, "BUY", trades.iloc[i]]
-        elif trades.iloc[i] < 0:
-            orders.iloc[i] = [selected_symbol, "SELL", abs(trades.iloc[i])]
+    # for i in range(len(trades)):
+    #     if trades.iloc[i] > 0:
+    #         orders.iloc[i] = [selected_symbol, "BUY", trades.iloc[i]]
+    #     elif trades.iloc[i] < 0:
+    #         orders.iloc[i] = [selected_symbol, "SELL", abs(trades.iloc[i])]
+    #     else:
+    #         orders.iloc[i] = [selected_symbol, "", 0]
+
+    # Process each trade
+    for date, row in trades.iterrows():
+        trade_value = row.iloc[0]  # Get the trade value (assuming single column DataFrame)
+
+        if trade_value > 0:
+            orders.loc[date, 'Order'] = 'BUY'
+            orders.loc[date, 'Shares'] = abs(trade_value)
+        elif trade_value < 0:
+            orders.loc[date, 'Order'] = 'SELL'
+            orders.loc[date, 'Shares'] = abs(trade_value)
         else:
-            orders.iloc[i] = [selected_symbol, "", 0]
+            orders.loc[date, 'Order'] = ''
+            orders.loc[date, 'Shares'] = 0
     return orders
 def manual_strategy_runner(symbol, sd, ed, sv, out_sample = False):
 
@@ -40,15 +62,27 @@ def benchmark_runner(symbol, sd, ed, sv):
     value = mktsim.compute_portvals(orders, start_val=sv, commission=0.0, impact=0.0)
 
     return value
+
+def strategy_learner_runner(symbol, sd, ed, sv):
+    sl = StrategyLearner.StrategyLearner()
+    sl.add_evidence("JPM", dt.datetime(2008, 1, 1), dt.datetime(2009, 12, 31), 1000000)
+
+    trades = sl.testPolicy(symbol, sd, ed, sv)
+    orders = process_orders(trades, symbol)
+    value = mktsim.compute_portvals(orders, start_val=sv, commission=0.0, impact=0.0)
+
+    return value
 def experiment1_plot(symbol, sd, ed, sv):
     dates = pd.date_range(sd, ed)
     df_container = pd.DataFrame(index=dates)
 
     ms_result = manual_strategy_runner(symbol, sd, ed, sv)
     bm_result = benchmark_runner(symbol, sd, ed, sv)
+    sl_result = strategy_learner_runner(symbol, sd, ed, sv)
 
     df_container["Manual_strategy"] = normalize(ms_result)
     df_container["Benchmark_strategy"] = normalize(bm_result)
+    df_container["Strategy_learner"] = normalize(sl_result)
 
 
     # Get trade entry points for plotting vertical lines
@@ -59,6 +93,8 @@ def experiment1_plot(symbol, sd, ed, sv):
     plt.figure(figsize=(12, 6))
     plt.plot(df_container.index, df_container["Manual_strategy"], 'r-', label="Manual Strategy")
     plt.plot(df_container.index, df_container["Benchmark_strategy"], 'purple', label="Benchmark")
+    plt.plot(df_container.index, df_container["Strategy_learner"], 'b-', label="Strategy Learner")
+    plt.legend(loc='best')  # 'best' places the legend in the optimal location to avoid covering data
 
     # Add vertical lines for entry points (as per requirements)
     # for date in long_entries:
@@ -75,7 +111,8 @@ def experiment1_plot(symbol, sd, ed, sv):
     # Save the plot (required for grading)
     plt.savefig(f"experiment1_{symbol}.png")
     plt.tight_layout()
-    plt.show()
+    plt.savefig('experiment1.png')  # Save the plot to a file
+    plt.show(block=True)  # This will block execution until the plot window is closed
 
     # Calculate and display performance metrics (required for report)
     # ms_daily_returns = ms_portvals.pct_change().dropna()
@@ -101,6 +138,8 @@ if __name__ == "__main__":
     symbol = "JPM"
     sd = dt.datetime(2010, 1, 1)
     ed = dt.datetime(2011, 12, 31)
+    # sd = dt.datetime(2008, 1, 1)
+    # ed = dt.datetime(2009, 12, 31)
     sv = 1000000
 
     # ms = manual_strategy_runner(symbol, sd, ed, sv)

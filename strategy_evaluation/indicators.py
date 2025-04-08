@@ -158,5 +158,6 @@ def run():
     stoch_plot(JPM_Prices['JPM'])
 
 
-def sma(param):
+def sma(prices, window=20):
+    sma = prices.rolling(window=window, min_periods=window).mean()
     return None
