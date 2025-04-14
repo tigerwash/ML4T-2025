@@ -48,8 +48,9 @@ from grading.grading import (
     IncorrectOutput,  		  	   		 	 	 			  		 			     			  	 
     grader,  		  	   		 	 	 			  		 			     			  	 
     run_with_timeout,  		  	   		 	 	 			  		 			     			  	 
-)  		  	   		 	 	 			  		 			     			  	 
-  		  	   		 	 	 			  		 			     			  	 
+)
+from strategy_evaluation import StrategyLearner
+
 # Test cases  		  	   		 	 	 			  		 			     			  	 
 StrategyTestCase = namedtuple(  		  	   		 	 	 			  		 			     			  	 
     "Strategy",  		  	   		 	 	 			  		 			     			  	 
@@ -482,7 +483,7 @@ def test_strategy(
 def compute_benchmark(  		  	   		 	 	 			  		 			     			  	 
     sd, ed, sv, symbol, market_impact, commission_cost, max_holdings  		  	   		 	 	 			  		 			     			  	 
 ):  		  	   		 	 	 			  		 			     			  	 
-    date_idx = util.get_data([symbol,], pd.date_range(sd, ed)).index  		  	   		 	 	 			  		 			     			  	 
+    date_idx = util.get_data([symbol,], pd.date_range(sd, ed)).index
     orders = pd.DataFrame(index=date_idx)  		  	   		 	 	 			  		 			     			  	 
     orders["orders"] = 0  		  	   		 	 	 			  		 			     			  	 
     orders["orders"][0] = max_holdings  		  	   		 	 	 			  		 			     			  	 

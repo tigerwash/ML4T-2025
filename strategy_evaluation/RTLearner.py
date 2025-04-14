@@ -1,4 +1,5 @@
 import numpy as np
+from scipy import stats
 
 class RTLearner(object):
     def __init__(self, leaf_size = 1, verbose=False):
@@ -8,6 +9,8 @@ class RTLearner(object):
         self.leaf_size = leaf_size
         self.tree = None
         self.verbose = verbose
+        np.random.seed(903648350)
+        # np.random.seed(99999)
 
     def author(self):
         return "lliao32"
@@ -27,17 +30,19 @@ class RTLearner(object):
         if self.verbose: print(self.tree)
 
     def build_tree(self, data):
-        #  base case
+        # base case
         # Tree structure: [feature, split_val, left_child, right_child]
         if data.shape[0] <= self.leaf_size:
-            return np.array([["Leaf", np.mean(data[:, -1]), np.nan, np.nan]])
+            # return np.array([["Leaf", np.mean(data[:, -1]), np.nan, np.nan]])
+            return np.array([["Leaf", stats.mode(data[:, -1])[0][0], np.nan, np.nan]])
         if np.unique(data[:, -1]).shape[0] == 1:
             return np.array([["Leaf", np.unique(data[:,-1])[0], np.nan, np.nan]])
 
         best_i, best_val = self.best_split(data)
         if best_i == -1:
-            return np.array([["Leaf", np.mean(data[:, -1]), np.nan, np.nan]])
-        #split data into left and right
+            # return np.array([["Leaf", np.mean(data[:, -1]), np.nan, np.nan]])
+            return np.array([["Leaf", stats.mode(data[:, -1])[0][0], np.nan, np.nan]])
+        # split data into left and right
         left_mask = data[:, best_i] <= best_val
         right_mask = ~left_mask
 

@@ -11,11 +11,11 @@ def study_group():
     return "lliao32"
 
 # Indicator 1: MACD (Moving Average Convergence Divergence) indicator
-def macd(prices, fast_period=12, slow_period=26, signal_period=9):
+def macd(prices, fast_period=7, slow_period=14):
     macd = prices.ewm(span=fast_period, min_periods=fast_period, adjust=False).mean() - prices.ewm(span=slow_period, min_periods=slow_period, adjust=False).mean()
     return macd
 
-def macd_signal(macd, signal_period=9):
+def macd_signal(macd, signal_period=5):
     signal = macd.ewm(span=signal_period, min_periods=signal_period, adjust=False).mean()
     return signal
 
