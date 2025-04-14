@@ -7,7 +7,7 @@ import marketsimcode as mktsim
 import matplotlib.pyplot as plt
 class ManualStrategy:
 
-    def __init__(self, verbose=False, impact=0.00, commission=0.00):
+    def __init__(self, verbose=False, impact=0.005, commission=9.95):
         self.verbose = verbose
         self.impact = impact
         self.commission = commission

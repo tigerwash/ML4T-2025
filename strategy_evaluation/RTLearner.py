@@ -15,6 +15,9 @@ class RTLearner(object):
     def author(self):
         return "lliao32"
 
+    def study_group(self):
+        return "lliao32"
+
     def add_evidence(self, data_x, data_y):
         """
         Add training data to learner

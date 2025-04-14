@@ -50,7 +50,7 @@ class StrategyLearner(object):
     :type commission: float  		  	   		 	 	 			  		 			     			  	 
     """  		  	   		 	 	 			  		 			     			  	 
     # constructor  		  	   		 	 	 			  		 			     			  	 
-    def __init__(self, verbose=False, impact=0.005, commission=0.0):
+    def __init__(self, verbose=False, impact=0.005, commission=9.95):
         """  		  	   		 	 	 			  		 			     			  	 
         Constructor method  		  	   		 	 	 			  		 			     			  	 
         """  		  	   		 	 	 			  		 			     			  	 
@@ -96,7 +96,7 @@ class StrategyLearner(object):
         # example usage of the old backward compatible util function  		  	   		 	 	 			  		 			     			  	 
         syms = [symbol]  		  	   		 	 	 			  		 			     			  	 
         period = pd.date_range(sd, ed)
-        prices_all = ut.get_data(syms, period, False)  # automatically adds SPY
+        prices_all = ut.get_data(syms, period, False)  # automatically remove SPY
         prices = prices_all[syms]  # only portfolio symbols
         prices = prices.ffill().bfill()
 
